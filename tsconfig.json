@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "inlineSourceMap": true
+  },
+  "include"  : [
+    "modules/twoquakers/peanut/pnut/core/**/*",
+    "modules/twoquakers/peanut/pnut/components/**/*",
+    "modules/twoquakers/peanut/pnut/packages/**/*",
+    "web.root/application/mvvm/vm/**/*",
+    "web.root/application/mvvm/components/**/*"
+  ]
+}

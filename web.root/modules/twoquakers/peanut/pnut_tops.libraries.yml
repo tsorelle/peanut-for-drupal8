@@ -1,0 +1,20 @@
+global-styling:
+  css:
+    theme:
+      css/style.css: {}
+view-models:
+  js:
+    js/headjs/head.load.min.js: {}
+    js/ko/knockout-3.4.1.js: {}
+  dependencies:
+    - core/jquery
+peanut-loader:
+  js:
+    pnut/core/PeanutLoader.js: {}
+  dependencies:
+    - pnut_tops/view-models
+peanut-loader-optimized:
+  js:
+    pnut/dist/loader.min.js: {}
+  dependencies:
+    - pnut_tops/view-models

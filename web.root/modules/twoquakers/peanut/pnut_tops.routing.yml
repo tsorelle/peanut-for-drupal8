@@ -1,0 +1,21 @@
+peanut.help:
+  path: '/peanut/help'
+  defaults:
+    _controller: '\Drupal\pnut_tops\Controller\PeanutController::helpcontent'
+    _title: 'Welcome to Peanut'
+  requirements:
+    _permission: 'access content'
+tops.execute:
+  path: '/peanut/service/execute'
+  defaults:
+    _controller: '\Drupal\pnut_tops\Controller\PeanutController::executeService'
+    _title: 'Welcome to Peanut'
+  requirements:
+    _permission: 'access content'
+peanut.config:
+  path: '/peanut/settings'
+  defaults:
+    _controller: '\Drupal\pnut_tops\Controller\PeanutController::getConfigSettings'
+    _title: 'Peanut settings'
+  requirements:
+    _permission: 'access content'

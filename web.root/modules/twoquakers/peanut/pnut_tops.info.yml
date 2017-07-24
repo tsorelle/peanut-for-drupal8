@@ -1,0 +1,6 @@
+name: Peanut/Tops Module
+description: Support for KnockoutJS and Tops Ajax Services
+package: twoquakers
+type: module
+version: 1.0
+core: 8.x

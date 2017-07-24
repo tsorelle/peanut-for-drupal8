@@ -1,0 +1,5 @@
+services:
+  pnut_tops_event_subscriber:
+    class: Drupal\pnut_tops\EventSubscriber\PeanutSubscriber
+    tags:
+      - {name: event_subscriber}

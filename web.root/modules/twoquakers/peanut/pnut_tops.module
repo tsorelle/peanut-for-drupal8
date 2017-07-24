@@ -1,0 +1,51 @@
+<?php
+use Tops\ui\TViewModelManager;
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function pnut_tops_preprocess_html(&$variables)
+{
+    $vm = TViewModelManager::getViewModelInfo();
+    $variables['knockoutviewname'] = $vm === false ? false : $vm->vmName;
+}
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function pnut_tops_page_attachments_alter(array &$attachments)
+{
+    $hasVm = TViewModelManager::hasVm();
+    if ($hasVm) {
+        $libName = \Tops\sys\TConfiguration::getBoolean('optimize','peanut',true) ?
+            'pnut_tops/peanut-loader-optimized' :
+            'pnut_tops/peanut-loader';
+        $attachments['#attached']['library'][] = 'pnut_tops/view-models';
+        $attachments['#attached']['library'][] = $libName;
+    }
+
+}
+
+/**
+ * Implements hook_preprocess().
+ */
+function pnut_tops_preprocess_node(&$variables) {
+    if (!empty($variables['page'])) {
+        /**
+         * @var \Tops\ui\TViewModelInfo
+         */
+        $vmInfo = TViewModelManager::getViewModelInfo();
+        if ($vmInfo !== null && $variables['node']->id() === $vmInfo->id) {
+            if ($vmInfo->view != 'content') {
+                $content = file_get_contents(DRUPAL_ROOT . '/' . $vmInfo->view);
+                if ($content !== false) {
+                    $variables['content']['body'][0]['#format'] = 'full_html';
+                    $variables['content']['body'][0]['#text'] = $content;
+                } else {
+                    trigger_error("View file not found: " . $vmInfo->view, E_NOTICE);
+                }
+            }
+
+        }
+    }
+}

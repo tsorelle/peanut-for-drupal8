@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Wheres the Code
+</title>
+</head>
+<body>
+<h1>Code and Configuration Locations for Peanut and Tops</h1>
+
+<ul>
+<li><strong>Initialization</strong>&#42; in <code>src/EventSubscriber/PeanutSubscriber</code> as configured in <code>pnut_tops.services.yml</code></li>
+<li><strong>Routing definitions</strong> in <code>pnut_tops.routing.yml</code></li>
+<li><strong>Routing implementations</strong> in <code>src/Controller/PeanutController.php</code></li>
+<li><strong>JS Library definitions</strong> in <code>peanut/pnut_tops.libraries.yml</code></li>
+<li><strong>Attach JS Libraries</strong> in <code>pnut_tops.module::pnut_tops_page_attachments_alter()</code></li>
+<li><strong>Insert view name for templates</strong> in <code>pnut_tops.module::pnut_tops_preprocess_html</code></li>
+<li><strong>Insert MVVM View content</strong> in <code>pnut_tops.module::pnut_tops_preprocess_node</code></li>
+<li><strong>Tops source</strong>&#42;&#42; in <code>tops/</code></li>
+<li><strong>Tops extension classes for Drupal 8</strong> <code>Tops/drupal8</code></li>
+<li><strong>Peanut JS/TS files</strong>&#42;&#42;&#42; <code>pnut\</code></li>
+<li><strong>Peanut 3rd Party Packages</strong>&#42;&#42;&#42; <code>pnut\packages</code></li>
+</ul>
+
+<p>&#42; Initialization includes autoloading and tops initializations for paths, configuration, etc.</p>
+
+<p>&#42;&#42; Except for the extension classes in <code>Tops/drupal8</code> files are imported from the Tops project. 
+https://github.com/tsorelle/tops</p>
+
+<p>&#42;&#42;&#42; Except for <code>pnut\packages</code>, all files are imported from the Peanut2017 project. https://github.com/tsorelle/peanut2017</p>
+
+</body>
+</html>

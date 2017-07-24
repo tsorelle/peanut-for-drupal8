@@ -1,0 +1,6 @@
+peanut.admin:
+  title: 'Peanut-Tops settings'
+  description: 'Instructions for Peanut-Tops module'
+  parent: system.admin_config_development
+  route_name: peanut.help
+  weight: 100
