@@ -1,0 +1,12 @@
+{
+  "name": "twoquakers/peanut-d8",
+  "description": "Peanut Framework Adapted for Drupal8",
+  "minimum-stability": "dev",
+  "license": "GPL-3.0+",
+  "authors": [
+    {
+      "name": "Terry SoRelle",
+      "email": "tls@2quakers.net"
+    }
+  ]
+}
