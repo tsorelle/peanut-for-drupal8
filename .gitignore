@@ -28,3 +28,4 @@
 /web.root/modules/twoquakers/peanut/pnut/
 /web.root/application/
 !/web.root/application/config/classes.ini
+~*.*

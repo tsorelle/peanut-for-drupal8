@@ -5,7 +5,7 @@ global-styling:
 view-models:
   js:
     js/headjs/head.load.min.js: {}
-    js/ko/knockout-3.4.1.js: {}
+    js/ko/knockout-3.4.2.js: {}
   dependencies:
     - core/jquery
 peanut-loader:
