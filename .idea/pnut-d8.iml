@@ -2,11 +2,24 @@
 <module type="WEB_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/web.root/application/src/Bookstore" isTestSource="false" packagePrefix="Bookstore" />
       <sourceFolder url="file://$MODULE_DIR$/web.root/modules/twoquakers/peanut/src/tops" isTestSource="false" packagePrefix="Tops" />
       <sourceFolder url="file://$MODULE_DIR$/web.root/modules/twoquakers/peanut/src/drupal8" isTestSource="false" packagePrefix="Tops\drupal8" />
+      <sourceFolder url="file://$MODULE_DIR$/web.root/modules/twoquakers/peanut/src/peanut" isTestSource="false" packagePrefix="Peanut" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/unit" isTestSource="true" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="PHARS">
+        <CLASSES>
+          <root url="phar://$MODULE_DIR$/vendor/phar-io/manifest/tests/_fixture/test.phar/" />
+          <root url="phar://$MODULE_DIR$/vendor/phpunit/phpunit/tests/_files/phpunit-example-extension/tools/phpunit.d/phpunit-example-extension-1.0.1.phar/" />
+        </CLASSES>
+        <SOURCES>
+          <root url="phar://$MODULE_DIR$/vendor/phar-io/manifest/tests/_fixture/test.phar/" />
+          <root url="phar://$MODULE_DIR$/vendor/phpunit/phpunit/tests/_files/phpunit-example-extension/tools/phpunit.d/phpunit-example-extension-1.0.1.phar/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>

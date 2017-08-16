@@ -8,5 +8,15 @@
       "name": "Terry SoRelle",
       "email": "tls@2quakers.net"
     }
-  ]
+  ],
+  "autoload": {
+    "psr-4": {
+      "Tops\\": "web.root/modules/twoquakers/peanut/src/tops",
+      "Tops\\drupal8\\": "web.root/modules/twoquakers/peanut/src/drupal8",
+      "Peanut\\" : "web.root/modules/twoquakers/peanut/src/peanut"
+    }
+  },
+  "require": {
+    "phpunit/phpunit": "6.1.3"
+  }
 }
