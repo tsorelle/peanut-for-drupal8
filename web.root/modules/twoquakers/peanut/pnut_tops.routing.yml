@@ -19,3 +19,10 @@ peanut.config:
     _title: 'Peanut settings'
   requirements:
     _permission: 'access content'
+peanut.pages:
+  path: '/peanut/{vmname}'
+  defaults:
+    _controller: '\Drupal\pnut_tops\Controller\PeanutController::renderViewModel'
+    _title: 'Peanut settings'
+  requirements:
+    _permission: 'access content'

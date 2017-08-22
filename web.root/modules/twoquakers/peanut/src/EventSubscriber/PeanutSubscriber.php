@@ -11,7 +11,7 @@ namespace Drupal\pnut_tops\EventSubscriber;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Tops\drupal8\TViewModel;
+use Tops\drupal8\ViewModel;
 
 class PeanutSubscriber implements EventSubscriberInterface {
 
@@ -28,7 +28,7 @@ class PeanutSubscriber implements EventSubscriberInterface {
              * @var
              */
             global $request;
-            TViewModel::Initialize($request);
+            ViewModel::Initialize($request);
 
             self::$peanutInitialized = TRUE;
 

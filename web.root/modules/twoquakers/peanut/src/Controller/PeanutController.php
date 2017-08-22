@@ -5,6 +5,7 @@
  */
 namespace Drupal\pnut_tops\Controller;
 use Drupal;
+use Peanut\sys\ViewModelPageBuilder;
 use Tops\Drupal8\ServiceRequestInputHandler;
 use Tops\services\ServiceFactory;
 
@@ -19,17 +20,18 @@ class PeanutController {
       $response = ServiceFactory::Execute();
       print json_encode($response);
       exit;
-      /*
-      $request = \Drupal::request();
-      $result = new \stdClass();
-      $result->message = 'Hello world';
-      print \json_encode($result);
-      exit;
-      */
   }
 
   public function getConfigSettings() {
       include(DRUPAL_ROOT.'/application/config/settings.php');
+      exit;
+  }
+
+  public function renderViewModel() {
+      $request = \Drupal::request();
+      $vmname = $request->get('vmname');
+      $content = ViewModelPageBuilder::Build($vmname);
+      print $content;
       exit;
   }
 

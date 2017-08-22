@@ -1,12 +1,12 @@
 <?php
-use Tops\ui\TViewModelManager;
+use Peanut\sys\ViewModelManager;
 
 /**
  * Implements hook_preprocess_HOOK().
  */
 function pnut_tops_preprocess_html(&$variables)
 {
-    $vm = TViewModelManager::getViewModelInfo();
+    $vm = ViewModelManager::getViewModelInfo();
     $variables['knockoutviewname'] = $vm === false ? false : $vm->vmName;
 }
 
@@ -15,7 +15,7 @@ function pnut_tops_preprocess_html(&$variables)
  */
 function pnut_tops_page_attachments_alter(array &$attachments)
 {
-    $hasVm = TViewModelManager::hasVm();
+    $hasVm = ViewModelManager::hasVm();
     if ($hasVm) {
         $libName = \Tops\sys\TConfiguration::getBoolean('optimize','peanut',true) ?
             'pnut_tops/peanut-loader-optimized' :
@@ -32,9 +32,9 @@ function pnut_tops_page_attachments_alter(array &$attachments)
 function pnut_tops_preprocess_node(&$variables) {
     if (!empty($variables['page'])) {
         /**
-         * @var \Tops\ui\TViewModelInfo
+         * @var \Peanut\sys\ViewModelInfo
          */
-        $vmInfo = TViewModelManager::getViewModelInfo();
+        $vmInfo = ViewModelManager::getViewModelInfo();
         if ($vmInfo !== null && $variables['node']->id() === $vmInfo->id) {
             if ($vmInfo->view != 'content') {
                 $content = file_get_contents(DRUPAL_ROOT . '/' . $vmInfo->view);

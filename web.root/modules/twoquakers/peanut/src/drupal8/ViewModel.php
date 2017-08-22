@@ -12,10 +12,10 @@ use Drupal;
 use Symfony\Component\HttpFoundation\Request;
 use Tops\sys\TConfiguration;
 use Tops\sys\TPath;
-use Tops\ui\TViewModelInfo;
-use Tops\ui\TViewModelManager;
+use Peanut\sys\ViewModelInfo;
+use Peanut\sys\ViewModelManager;
 
-class TViewModel
+class ViewModel
 {
     /**
      *
@@ -148,7 +148,7 @@ class TViewModel
         $name = self::getVmPathFromRequest($request);
         if ($name)
         {
-            $result = TViewModelManager::getViewModelSettings($name);
+            $result = ViewModelManager::getViewModelSettings($name);
             $result->id = self::getCurrentNodeId($request);
             return $result;
         }
