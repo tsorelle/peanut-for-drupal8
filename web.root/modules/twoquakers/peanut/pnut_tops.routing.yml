@@ -19,6 +19,13 @@ peanut.config:
     _title: 'Peanut settings'
   requirements:
     _permission: 'access content'
+peanut.testing:
+  path: '/peanut/test/{testname}'
+  defaults:
+    _controller: '\Drupal\pnut_tops\Controller\PeanutController::runtest'
+    _title: 'Peanut testing'
+  requirements:
+    _permission: 'access content'
 peanut.pages:
   path: '/peanut/{vmname}'
   defaults:

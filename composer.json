@@ -13,7 +13,8 @@
     "psr-4": {
       "Tops\\": "web.root/modules/twoquakers/peanut/src/tops",
       "Tops\\drupal8\\": "web.root/modules/twoquakers/peanut/src/drupal8",
-      "Peanut\\" : "web.root/modules/twoquakers/peanut/src/peanut"
+      "Peanut\\" : "web.root/modules/twoquakers/peanut/src/peanut",
+      "PHPMailer\\PHPMailer\\" : "web.root/modules/twoquakers/peanut/src/vendor/phpmailer/src"
     }
   },
   "require": {

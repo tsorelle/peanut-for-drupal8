@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/web.root/modules/twoquakers/peanut/src/drupal8" isTestSource="false" packagePrefix="Tops\drupal8" />
       <sourceFolder url="file://$MODULE_DIR$/web.root/modules/twoquakers/peanut/src/peanut" isTestSource="false" packagePrefix="Peanut" />
       <sourceFolder url="file://$MODULE_DIR$/tests/unit" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/web.root/modules/twoquakers/peanut/src/vendor/phpmailer/src" isTestSource="false" packagePrefix="PHPMailer\PHPMailer" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
