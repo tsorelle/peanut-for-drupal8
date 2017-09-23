@@ -2,8 +2,8 @@
 /**
  * Created by PhpStorm.
  * User: Terry
- * Date: 9/12/2017
- * Time: 10:13 AM
+ * Date: 9/23/2017
+ * Time: 9:41 AM
  */
 
 namespace PeanutTest\scripts;
@@ -11,13 +11,13 @@ namespace PeanutTest\scripts;
 
 use Tops\sys\IPermissionsManager;
 use Tops\sys\TObjectContainer;
+use Tops\sys\TUser;
 
-class PermissionsTest extends TestScript
+class UserTest extends TestScript
 {
 
     public function execute()
     {
-
         /**
          * @var $manager IPermissionsManager
          */
@@ -29,30 +29,24 @@ class PermissionsTest extends TestScript
         $count = sizeof($roles);
         $this->assert($count > 0, 'No roles returned');
 
-        $manager->addRole('Test User');
+        $testUserRole = 'Test User';
+        $manager->addRole($testUserRole);
         $roles = $manager->getRoles();
         $actual = sizeof($roles);
         $expected = $count + 1;
         $this->assertEquals($expected,$actual,'Test not added');
 
 
-        $roles = $manager->getRoles();
-        var_dump($roles);
-        print "\n\n";
+//        $roles = $manager->getRoles();
+//        var_dump($roles);
+//        print "\n\n";
 
+        $testPermission = 'perform test';
         $manager->addPermission('perform test','Perform TOPS Tests');
+        $manager->assignPermission($testUserRole,$testPermission);
 
-        $manager->assignPermission('Test User','perform test');
+        return;
 
-
-/*
-
-        $manager->removeRole('Test Role');
-        $roles = $manager->getRoles();
-        $actual = sizeof($roles);
-        $expected = $count;
-        $this->assertEquals($expected,$actual,'Test not removed');
-  */
 
     }
 }

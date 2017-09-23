@@ -218,7 +218,7 @@ class TDrupal8User extends TAbstractUser
     public function isAdmin()
     {
         if ($this->drupalUser) {
-            return ($this->drupalUser->id() == 1 || $this->isMemberOf('administrator'));
+            return ($this->isMemberOf('administrator'));
         }
         return false;
     }
@@ -241,20 +241,9 @@ class TDrupal8User extends TAbstractUser
     public function isMemberOf($roleName)
     {
         if ($this->drupalUser) {
+            $roleName = Drupal8Roles::roleNameToMachineName($roleName);
             $roles = $this->drupalUser->getRoles();
             return in_array($roleName,$roles);
-        }
-        return false;
-    }
-
-    /**
-     * @param string $value
-     * @return bool
-     */
-    public function isAuthorized($value = '')
-    {
-        if ($this->drupalUser) {
-            return $this->drupalUser->hasPermission($value);
         }
         return false;
     }

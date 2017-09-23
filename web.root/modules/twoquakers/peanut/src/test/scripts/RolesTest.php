@@ -14,7 +14,7 @@ class RolesTest extends TestScript
 
     public function execute()
     {
-        $roleObjects =  array(); //todo: implement test
+        $roleObjects =  user_roles();
         var_dump($roleObjects);
 
     }

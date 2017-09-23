@@ -12,43 +12,18 @@ namespace Tops\drupal8;
 use Drupal\user\RoleInterface;
 use Tops\sys\IPermissionsManager;
 use Tops\drupal8\TDrupal8Permission;
+use Tops\sys\TPermission;
 use Tops\sys\TUser;
 
 class Drupal8PermissionsManager implements IPermissionsManager
 {
-
-    /**
-     * @param $roleName
-     * @return bool|RoleInterface
-     */
-    private function getDrupalRole($roleName)
-    {
-        try {
-            /**
-             * @var $roleObject RoleInterface
-             */
-            $roleObject = \Drupal\user\Entity\Role::load($roleName);
-            if (empty($roleObject)) {
-                return false;
-            }
-            return $roleObject;
-        }
-        catch (\Exception $ex) {
-            return false;
-        }
-    }
-
     /**
      * @param string $roleName
      * @return bool
      */
     public function addRole($roleName, $roleDescription = null)
     {
-        /**
-         * @var $roleObject RoleInterface
-         */
-        $roleObject = \Drupal\user\Entity\Role::create(array('id' => $roleName, 'label' => $roleDescription));
-        $roleObject->save();
+        return Drupal8Roles::addRole($roleName,$roleDescription);
     }
 
     /**
@@ -57,12 +32,7 @@ class Drupal8PermissionsManager implements IPermissionsManager
      */
     public function removeRole($roleName)
     {
-        $roleObject = $this->getDrupalRole($roleName);
-        if ($roleObject === false) {
-            return false;
-        }
-        $roleObject->delete();
-        return true;
+        return Drupal8Roles::removeRole($roleName);
     }
 
     /**
@@ -70,22 +40,7 @@ class Drupal8PermissionsManager implements IPermissionsManager
      */
     public function getRoles()
     {
-        $result = array();
-
-        /**
-         * @var $roleObjects RoleInterface[]
-         */
-        $roleObjects = user_roles();
-
-        // unset($roleObjects['administrator']);
-
-        foreach ($roleObjects as $roleName => $roleObject) {
-            $item = new \stdClass();
-            $item->Name = $roleName;
-            $item->Value = $roleObject->label();
-            $result[] = $item;
-        }
-        return $result;
+        return Drupal8Roles::getRoles();
     }
 
     /**
@@ -93,8 +48,7 @@ class Drupal8PermissionsManager implements IPermissionsManager
      */
     public function getPermission($permissionName)
     {
-        // not used in drupal
-        return null;
+        return $permission = $this->getRepository()->getEntity($permissionName);
     }
 
     /**
@@ -104,8 +58,7 @@ class Drupal8PermissionsManager implements IPermissionsManager
      */
     public function assignPermission($roleName, $permissionName)
     {
-        $roleObject = $this->getDrupalRole($roleName);
-
+        $roleObject = Drupal8Roles::getDrupalRole($roleName);
         if ($roleObject === false) {
             return false;
         }
@@ -121,7 +74,7 @@ class Drupal8PermissionsManager implements IPermissionsManager
      */
     public function revokePermission($roleName, $permissionName)
     {
-        $roleObject = $this->getDrupalRole($roleName);
+        $roleObject = Drupal8Roles::getDrupalRole($roleName);
         if ($roleObject === false) {
             return false;
         }

@@ -17,6 +17,7 @@ class TDrupal8Permission extends TPermission
 
     public function check($roleName)
     {
+        $roleName =  Drupal8Roles::roleNameToMachineName($roleName);
         try {
             /**
              * @var $roleObject RoleInterface
@@ -30,7 +31,5 @@ class TDrupal8Permission extends TPermission
         catch (\Exception $ex) {
             return false;
         }
-
     }
-
 }
