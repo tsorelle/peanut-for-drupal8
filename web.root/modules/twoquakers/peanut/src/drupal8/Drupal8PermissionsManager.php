@@ -23,7 +23,8 @@ class Drupal8PermissionsManager implements IPermissionsManager
      */
     public function addRole($roleName, $roleDescription = null)
     {
-        return Drupal8Roles::addRole($roleName,$roleDescription);
+        // drupal 8 doesn't use verbose descriptions
+        return Drupal8Roles::addRole($roleName);
     }
 
     /**

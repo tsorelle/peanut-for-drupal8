@@ -47,11 +47,9 @@ class Drupal8Roles
      * @param null $roleDescription
      * @return bool
      */
-    public static function addRole($roleName, $roleDescription = null)
+    public static function addRole($roleName)
     {
-        if ($roleDescription == null) {
-            $roleDescription = $roleName;
-        }
+        $roleDescription = $roleName;
         $roleName = self::roleNameToMachineName($roleName);
         /**
          * @var $roleObject RoleInterface
