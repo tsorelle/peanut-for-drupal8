@@ -49,3 +49,19 @@ function pnut_tops_preprocess_node(&$variables) {
         }
     }
 }
+
+function pnut_tops_install() {
+    $installationIni = @parse_ini_file(__DIR__.'/installation/installation.ini');
+    if ($installationIni !== false && !empty($installationIni['enabled'])) {
+        require_once (__DIR__.'/installation/bootstrap/PeanutModuleInstaller.php');
+        \Tops\drupal8\PeanutModuleInstaller::install();
+    }
+}
+
+function pnut_tops_uninstall() {
+    $installationIni = @parse_ini_file(__DIR__.'/installation/installation.ini');
+    if ($installationIni !== false && (!empty($installationIni['enabled'])) && class_exists('\Peanut\sys\DefaultPeanutInstaller')) {
+        $installer = new \Peanut\sys\DefaultPeanutInstaller();
+        $installer->uninstallAll();
+    }
+}

@@ -130,4 +130,9 @@ class Drupal8PermissionsManager implements IPermissionsManager
         }
         return $permissions;
     }
+
+    public function removePermission($name)
+    {
+       return $this->getRepository()->removePermission($name);
+    }
 }

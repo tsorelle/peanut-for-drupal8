@@ -65,6 +65,7 @@ class Drupal8PermissionsRepository extends TEntityRepository
         $id = $permission->getId();
         $sql = 'delete from '.$this->getTableName().' where id = ?';
         $this->executeStatement($sql,[$id]);
+        return true;
     }
 
     public function getPermissionsList($showAll = false) {
