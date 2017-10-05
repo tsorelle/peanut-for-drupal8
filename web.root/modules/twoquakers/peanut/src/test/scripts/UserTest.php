@@ -2,51 +2,93 @@
 /**
  * Created by PhpStorm.
  * User: Terry
- * Date: 9/23/2017
- * Time: 9:41 AM
+ * Date: 10/1/2017
+ * Time: 4:01 PM
  */
 
 namespace PeanutTest\scripts;
 
 
-use Tops\sys\IPermissionsManager;
-use Tops\sys\TObjectContainer;
+
+use Tops\drupal8\TDrupal8User;
 use Tops\sys\TUser;
 
 class UserTest extends TestScript
 {
 
+    const adminUser = 'admin';
+    const testUser = 'mrtester';
+    const anonymous = 'Guest';
+
     public function execute()
     {
         /**
-         * @var $manager IPermissionsManager
+         * @var $user TDrupal8User
          */
-        $manager = TObjectContainer::Get('tops.permissions');
-        $this->assert(!empty($manager), 'Manager not instantiated.');
-
-        $roles = $manager->getRoles();
-
-        $count = sizeof($roles);
-        $this->assert($count > 0, 'No roles returned');
-
-        $testUserRole = 'Test User';
-        $manager->addRole($testUserRole);
-        $roles = $manager->getRoles();
-        $actual = sizeof($roles);
-        $expected = $count + 1;
-        $this->assertEquals($expected,$actual,'Test not added');
+        $user = TUser::getCurrent();
 
 
-//        $roles = $manager->getRoles();
-//        var_dump($roles);
-//        print "\n\n";
+        print "Current user " . $user->getUserName() . "\n";
+        $actual = $user->isCurrent();
+        print "Is current user? " . ($actual ? 'Yes' : 'No') . "\n";
+        $this->assert($actual, 'not current');
+        $currentUserName = $user->getUserName();
+        $authenticated = $user->isAuthenticated();
+        print "Authenticated? " . ($authenticated ? 'Yes' : 'No') . "\n";
+        if (!$authenticated) {
+            $expected = ($currentUserName === self::anonymous) ? false : true;
+            $this->assertEquals($expected, $actual, 'isAuthenticated failed');
+        } else {
+            $this->assert($currentUserName !== self::anonymous, 'isAuthenticated failed');
+        }
 
-        $testPermission = 'perform test';
-        $manager->addPermission('perform test','Perform TOPS Tests');
-        $manager->assignPermission($testUserRole,$testPermission);
+        $isAdmin = $user->isAdmin();
+        print "Current is admin? " . ($isAdmin ? 'Yes' : 'No') . "\n";
+        if ($isAdmin) {
+            $this->assertEquals(self::adminUser, $currentUserName, 'isAdmin failed');
+        } else {
+            $this->assert(self::adminUser != $currentUserName, 'isAdmin failed');
+        }
 
-        return;
+        $user = TUser::getByUserName(self::testUser);
+        $actual = $user->getUserName();
+        $this->assertEquals(self::testUser, $actual, 'user name');
+        print "Loaded user " . self::testUser . "\n";
 
+        $testUserCurrent = $user->isCurrent();
+        print "Is '" . self::testUser . "' current user? " . ($testUserCurrent ? 'Yes' : 'No') . "\n";
+
+        $actual = $user->getEmail();
+        $this->assertNotNull($actual, 'Email');
+        print "Email: $actual\n";
+
+
+
+                $actual = $user->getFullName();
+                $this->assertNotNull($actual, 'full name');
+                print "Full name: $actual\n";
+
+/*
+                $actual = $user->getShortName();
+                $this->assertNotNull($actual, 'short name');
+                print "Short name: $actual\n";
+
+                $actual = $user->getDisplayName();
+                $this->assertNotNull($actual, 'display name');
+                print "Display name: $actual\n";
+
+                $actusl = $user->isMemberOf('mail_administrator');
+                print "Mail admin? " . ($actual ? 'Yes' : 'No') . "\n";
+                $this->assert($actual, 'Not member of mail admin');
+
+                $actual = $user->isAuthorized(TUser::mailAdminPermissionName);
+                $this->assert($actual, 'cannot administer mail');
+                print "Can administer mail? " . ($actual ? 'Yes' : 'No') . "\n";
+
+                $actual = $user->isAuthorized(TUser::appAdminPermissionName);
+                $this->assert(!$actual, 'Not expected to administer peanut');
+                print "Can administer peanut? " . ($actual ? 'Yes' : 'No') . "\n";
+        */
 
     }
 }

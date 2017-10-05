@@ -10,14 +10,15 @@ namespace Tops\drupal8;
 
 
 use Drupal\user\RoleInterface;
+use Tops\sys\TStrings;
 
 class Drupal8Roles
 {
-    public static function roleNameToMachineName($roleName) {
-        if (strpos($roleName,' ') !== false) {
-            return strtolower(str_replace(' ','_',$roleName));
-        }
-        return $roleName;
+    public static $roleNameFormat = TStrings::keyFormat;
+    public static $roleDescriptionFormat = TStrings::initialCapFormat;
+
+    public static function formatRoleName($roleName) {
+        return TStrings::convertNameFormat($roleName,self::$roleNameFormat);
     }
 
     /**
@@ -26,7 +27,7 @@ class Drupal8Roles
      */
     public static function getDrupalRole($roleName)
     {
-        $roleName = self::roleNameToMachineName($roleName);
+        $roleName = TStrings::convertNameFormat($roleName,self::$roleNameFormat);
         try {
             /**
              * @var $roleObject RoleInterface
@@ -49,12 +50,12 @@ class Drupal8Roles
      */
     public static function addRole($roleName)
     {
-        $roleDescription = $roleName;
-        $roleName = self::roleNameToMachineName($roleName);
+        $roleId = TStrings::convertNameFormat($roleName,self::$roleNameFormat);
+        $roleDescription = TStrings::convertNameFormat($roleName,TStrings::initialCapFormat);
         /**
          * @var $roleObject RoleInterface
          */
-        $roleObject = \Drupal\user\Entity\Role::create(array('id' => $roleName, 'label' => $roleDescription));
+        $roleObject = \Drupal\user\Entity\Role::create(array('id' => $roleId, 'label' => $roleDescription));
         $roleObject->save();
         return true;
     }
@@ -65,7 +66,6 @@ class Drupal8Roles
      */
     public static function removeRole($roleName)
     {
-        $roleName = self::roleNameToMachineName($roleName);
         $roleObject = self::getDrupalRole($roleName);
         if ($roleObject === false) {
             return false;

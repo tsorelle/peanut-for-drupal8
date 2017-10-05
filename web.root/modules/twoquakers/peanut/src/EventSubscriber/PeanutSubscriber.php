@@ -21,7 +21,12 @@ class PeanutSubscriber implements EventSubscriberInterface {
         if (!self::$peanutInitialized) {
             include_once(DRUPAL_ROOT . "/application/config/peanut-bootstrap.php");
             \Peanut\Bootstrap::initialize(DRUPAL_ROOT);
-            session_start();
+
+            // On login drupal tries to start session , could be a problem.
+            // session_start();
+            if (!isset($_SESSION)) {
+                session_start();
+            }
             \Tops\sys\TSession::Initialize();
 
             /**

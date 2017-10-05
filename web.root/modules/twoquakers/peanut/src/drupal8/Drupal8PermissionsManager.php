@@ -10,13 +10,17 @@ namespace Tops\drupal8;
 
 
 use Drupal\user\RoleInterface;
+use Tops\db\model\repository\BasicPermissionsRepository;
 use Tops\sys\IPermissionsManager;
 use Tops\drupal8\TDrupal8Permission;
 use Tops\sys\TPermission;
+use Tops\sys\TStrings;
 use Tops\sys\TUser;
 
 class Drupal8PermissionsManager implements IPermissionsManager
 {
+    public static $permisionNameFormat = TStrings::initialCapFormat;
+
     /**
      * @param string $roleName
      * @return bool
@@ -49,6 +53,7 @@ class Drupal8PermissionsManager implements IPermissionsManager
      */
     public function getPermission($permissionName)
     {
+        $permissionName = TStrings::convertNameFormat($permissionName,self::$permisionNameFormat);
         return $permission = $this->getRepository()->getEntity($permissionName);
     }
 
@@ -59,6 +64,7 @@ class Drupal8PermissionsManager implements IPermissionsManager
      */
     public function assignPermission($roleName, $permissionName)
     {
+        $permissionName = TStrings::convertNameFormat($permissionName,self::$permisionNameFormat);
         $roleObject = Drupal8Roles::getDrupalRole($roleName);
         if ($roleObject === false) {
             return false;
@@ -75,6 +81,7 @@ class Drupal8PermissionsManager implements IPermissionsManager
      */
     public function revokePermission($roleName, $permissionName)
     {
+        $permissionName = TStrings::convertNameFormat($permissionName,self::$permisionNameFormat);
         $roleObject = Drupal8Roles::getDrupalRole($roleName);
         if ($roleObject === false) {
             return false;
@@ -87,17 +94,17 @@ class Drupal8PermissionsManager implements IPermissionsManager
     /******** Tops functions **********************/
 
     /**
-     * @var Drupal8PermissionsRepository
+     * @var BasicPermissionsRepository
      */
     private $permissionsRepository;
 
     /**
-     * @return Drupal8PermissionsRepository
+     * @return BasicPermissionsRepository
      */
     private function getRepository()
     {
         if (!isset($this->permissionsRepository)) {
-            $this->permissionsRepository = new Drupal8PermissionsRepository();
+            $this->permissionsRepository = new BasicPermissionsRepository();
         }
         return $this->permissionsRepository;
     }
@@ -114,8 +121,12 @@ class Drupal8PermissionsManager implements IPermissionsManager
 
     public function addPermission($name, $description)
     {
+        $name = TStrings::convertNameFormat($name,self::$permisionNameFormat);
         $username = TUser::getCurrent()->getUserName();
-        $this->getRepository()->addPermission($name,$description,$username);
+        $existing = $this->getRepository()->getPermission($name);
+        if (empty($existing)) {
+            $this->getRepository()->addPermission($name, $description, $username);
+        }
         return true;
     }
 
@@ -133,6 +144,13 @@ class Drupal8PermissionsManager implements IPermissionsManager
 
     public function removePermission($name)
     {
-       return $this->getRepository()->removePermission($name);
+        $name = TStrings::convertNameFormat($name,self::$permisionNameFormat);
+
+        return $this->getRepository()->removePermission($name);
+    }
+
+    public function verifyPermission($permissionName)
+    {
+        // TODO: Implement verifyPermission() method.
     }
 }

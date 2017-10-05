@@ -15,6 +15,8 @@ use Tops\cache\ITopsCache;
 use Tops\cache\TSessionCache;
 use Tops\sys\IUser;
 use Tops\sys\TAbstractUser;
+use Tops\sys\TStrings;
+use Tops\sys\TUser;
 
 /**
  * Class TConcrete5User
@@ -23,32 +25,23 @@ use Tops\sys\TAbstractUser;
  */
 class TDrupal8User extends TAbstractUser
 {
-    protected function test() {
-        return 'drupal';
-    }
-
-
-    function __construct(AccountInterface $user = null) {
-        if (isset($user)) {
-            $this->loadDrupalUser($user);
-        }
-        $result = $this->test();
-    }
-
     /**
      * @var AccountInterface
      */
-    private   $drupalUser;
-
-
+    private $drupalUser;
+    private $userEntity;
+    private $fieldDefinitions;
 
     protected function loadDrupalUser(AccountInterface $account = null)
     {
-        $test = $this->test();
-        $this->drupalUser = $account;
-        if (empty($account)) {
+        unset ($this->isCurrentUser);
+        if ($account == null) {
+            unset($this->drupalUser);
+            unset($this->drupalEntity);
             return;
         }
+
+        $this->drupalUser = $account;
 
         // todo: this may not work in Drupal 8
         if ($_SERVER['SCRIPT_NAME'] === '/cron.php') {
@@ -58,125 +51,22 @@ class TDrupal8User extends TAbstractUser
             return;
         }
 
-        $currentUser = Drupal::currentUser();
-
-        if ($account == null) {
-            $this->drupalUser = $account;
-            $this->isCurrentUser = true;
-        } else {
-            $this->isCurrentUser = $account->id() == $currentUser->id();
-        }
-
-
-        if ($account) {
-            $this->email = $account->getEmail();
-            $this->userName = $account->getUsername();
-            $this->id = $account->id();
-        }
+        $this->userName = $account->getAccountName();//  getUsername();
+        $this->id = $account->id();
 
     }
 
-    /**
-     * @var ITopsCache
-     */
-    private static $profileCache;
 
     /**
-     * @return ITopsCache
+     * @param $email
+     * @return void
      */
-    public static function getProfileCache()
+    public function loadByEmail($email)
     {
-        if (!isset(self::$profileCache)) {
-            self::$profileCache = new TSessionCache();
-        }
-        // self::$profileCache->FlushCachedItems();
-        return self::$profileCache;
+        $account = user_load_by_mail($email);
+        $this->loadDrupalUser($account);
     }
 
-    private function getCachedProfile() {
-        $cache = self::getProfileCache();
-        $result = $cache->Get('users.'.$this->userName);
-        return $result;
-    }
-
-    private function cacheProfile() {
-        $cache = self::getProfileCache();
-        $result = $cache->Set('users.'.$this->userName,$this->profile,20);
-        return $result;
-    }
-
-    public function getContentTypes() {
-        // todo: review and test before use in Drupal8
-        $result = $this->getProfileValue('user-content-types');
-        if (!$result) {
-            $types = node_type_get_types();
-            $result = array();
-            foreach($types as $type) {
-                if (!$type->disabled) {
-                    $permission =  $type->type == 'book' ? 'create new books' : 'create '.$type->type." content";
-                    if ($this->isAuthorized($permission)) {
-                        $result[$type->type] = $type;
-                    }
-                }
-            }
-            $this->setProfileValue('user-content-type',$result);
-        }
-        return $result;
-    }
-
-
-
-    /**
-     * @param AccountInterface $user
-     *
-     * Assign firstName, lastName, middleName and pictureFile
-     *
-     * This version for Drupal 7 - might work with 8, we'll see...
-     */
-    protected function loadProfile() {
-        // todo: Revise for Drupal 8
-        $this->profile = $this->getCachedProfile();
-        if (empty($this->profile)) {
-            $this->profile = array();
-            $drupalUser = user_load($this->getId());
-            if ($drupalUser != null) {
-                $vars = get_object_vars($drupalUser);
-                $keys = array_keys($vars);
-                foreach ($keys as $key) {
-                    if (substr($key, 0, 6) === "field_") {
-                        $value = $this->getSingleFieldValue($drupalUser,$key);
-                        if ($value !== false) {
-                            $fieldName = substr($key, 6);
-                            if ($fieldName == 'full_name' && !empty($value)) {
-                                // as expected by TAbstract user
-                                $fieldName = 'fullName';
-                                $this->profile['shortName'] = $value;
-                            }
-                            $this->profile[$fieldName] = $value;
-                        }
-                    }
-                }
-            }
-            $this->cacheProfile();
-        }
-    }
-
-    private function getSingleFieldValue($account,$fieldName,$safeValue=true) {
-        // todo: Subroutine for profile management. Revise or remove for Drupal 8
-        $items = field_get_items('user',$account,$fieldName);
-        if (!empty($items)) {
-            $valueIndex = $safeValue ? 'safe_value' : 'value';
-            $hasValue = isset($items[0][$valueIndex]);
-            if ($safeValue && !$hasValue) {
-                $valueIndex = 'value';
-                $hasValue = isset($items[0][$valueIndex]);
-            }
-            if ($hasValue) {
-                return $items[0][$valueIndex];
-            }
-        }
-        return false;
-    }
 
 
     /**
@@ -189,7 +79,6 @@ class TDrupal8User extends TAbstractUser
         $drupalAccount = \Drupal\user\Entity\User::load($id);
         // for Drupal 7
         // $drupalAccount = TDrupalAccount::GetById($id);
-
         $this->loadDrupalUser($drupalAccount);
     }
 
@@ -210,7 +99,55 @@ class TDrupal8User extends TAbstractUser
     {
         $account = Drupal::currentUser();
         $this->loadDrupalUser($account);
+        $this->isCurrentUser = true;
     }
+
+    /**
+     * @param AccountInterface $user
+     *
+     * Assign firstName, lastName, middleName and pictureFile
+     *
+     * This version for Drupal 7 - might work with 8, we'll see...
+     */
+    protected function loadProfile()
+    {
+
+        // $this->profile['email'] = $this->drupalUser->get('mail')->value;
+        $this->userEntity =\Drupal\user\Entity\User::load($this->getId());
+        $this->fieldDefinitions =  $this->userEntity->getFieldDefinitions();
+        $email = $this->getEntityValue('mail',false);
+        $this->profile[TUser::profileKeyEmail] = $email;
+    }
+
+    public function getProfileValue($key)
+    {
+        $result = parent::getProfileValue($key);
+        if ($result == false) {
+            $result = $this->getEntityValue($key);
+        }
+        return empty($result) ? '' : $result;
+    }
+
+    private function getEntityValue($key,$custom=true) {
+        $result = '';
+        $key = TStrings::convertNameFormat($key,TStrings::keyFormat);
+        if ($custom) {
+            $key = "field_$key";
+        }
+        if (array_key_exists($key,$this->fieldDefinitions)) {
+            $field = $this->userEntity->get($key);
+            if (is_object($field)) {
+                $value = $field->getValue();
+                if (is_array($value) && !empty($value[0]['value'])) {
+                    $result = $value[0]['value'];
+                }
+            }
+        }
+        return $result;
+    }
+
+
+
 
     /**
      * @return bool
@@ -221,6 +158,15 @@ class TDrupal8User extends TAbstractUser
             return ($this->isMemberOf('administrator'));
         }
         return false;
+    }
+
+    public function isCurrent()
+    {
+        if (!isset($this->isCurrentUser)) {
+            $current = Drupal::currentUser();
+            $this->isCurrentUser = ($this->getId() === $current->id());
+        }
+        return $this->isCurrentUser;
     }
 
     /**
@@ -241,7 +187,7 @@ class TDrupal8User extends TAbstractUser
     public function isMemberOf($roleName)
     {
         if ($this->drupalUser) {
-            $roleName = Drupal8Roles::roleNameToMachineName($roleName);
+            $roleName = Drupal8Roles::formatRoleName($roleName);
             $roles = $this->drupalUser->getRoles();
             return in_array($roleName,$roles);
         }
@@ -261,12 +207,52 @@ class TDrupal8User extends TAbstractUser
 
 
     /**
-     * @param $email
-     * @return mixed
+     * @return array|bool|mixed|string
+     * @deprecated Drupal 7
      */
-    public function loadByEmail($email)
-    {
-        // TODO: Implement loadByEmail() method.
-        throw new Exception("Method 'loadbyEmail not implemented.");
+    public function getContentTypes() {
+        // todo: review and test before use in Drupal8
+        $result = $this->getProfileValue('user-content-types');
+        if (!$result) {
+            $types = node_type_get_types();
+            $result = array();
+            foreach($types as $type) {
+                if (!$type->disabled) {
+                    $permission =  $type->type == 'book' ? 'create new books' : 'create '.$type->type." content";
+                    if ($this->isAuthorized($permission)) {
+                        $result[$type->type] = $type;
+                    }
+                }
+            }
+            $this->setProfileValue('user-content-type',$result);
+        }
+        return $result;
     }
+
+
+    /**
+     * @param $account
+     * @param $fieldName
+     * @param bool $safeValue
+     * @return bool
+     * @deprecated Drupal 7
+     */
+    private function getSingleFieldValue($account,$fieldName,$safeValue=true) {
+        // todo: Subroutine for profile management. Revise or remove for Drupal 8
+        $items = field_get_items('user',$account,$fieldName);
+        if (!empty($items)) {
+            $valueIndex = $safeValue ? 'safe_value' : 'value';
+            $hasValue = isset($items[0][$valueIndex]);
+            if ($safeValue && !$hasValue) {
+                $valueIndex = 'value';
+                $hasValue = isset($items[0][$valueIndex]);
+            }
+            if ($hasValue) {
+                return $items[0][$valueIndex];
+            }
+        }
+        return false;
+    }
+
+
 }
