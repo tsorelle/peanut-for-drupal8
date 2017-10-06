@@ -13,6 +13,7 @@ use Drupal\Core\Session\AccountInterface;
 use Masterminds\HTML5\Exception;
 use Tops\cache\ITopsCache;
 use Tops\cache\TSessionCache;
+use Tops\db\TDBPermissionsManager;
 use Tops\sys\IUser;
 use Tops\sys\TAbstractUser;
 use Tops\sys\TStrings;
@@ -130,7 +131,7 @@ class TDrupal8User extends TAbstractUser
 
     private function getEntityValue($key,$custom=true) {
         $result = '';
-        $key = TStrings::convertNameFormat($key,TStrings::keyFormat);
+        $key = TUser::getProfileFieldKey($key); // TStrings::convertNameFormat($key,TStrings::keyFormat);
         if ($custom) {
             $key = "field_$key";
         }
@@ -227,6 +228,16 @@ class TDrupal8User extends TAbstractUser
             $this->setProfileValue('user-content-type',$result);
         }
         return $result;
+    }
+
+    public function isAuthorized($value = '')
+    {
+        $value = TStrings::convertNameFormat($value,Drupal8PermissionsManager::$permisionNameFormat);
+        $authorized = parent::isAuthorized($value);
+        if (!$authorized) {
+            $authorized = $this->drupalUser->hasPermission($value);
+        }
+        return $authorized;
     }
 
 

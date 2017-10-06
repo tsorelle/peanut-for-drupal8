@@ -15,34 +15,33 @@ abstract class TestScript
      private $assertions = 0;
      private $passed = 0;
      private $failed = 0;
-     protected function assert($proposition,$message,$successMessage=null) {
+     protected function assert($proposition,$message) {
          $this->assertions++;
          if ($proposition) {
              $this->passed++;
-             if (!empty($successMessage)) {
-                 print "$successMessage\n";
-
-             }
-             return;
+             return true;
          }
          $this->failed++;
          print "Assertion failed, $message\n";
+         return false;
      }
 
-     protected function assertNotEmpty($actual,$item,$successMessage=null) {
-         $this->assert(!empty($actual),$item.'was empty',$successMessage);
+     protected function assertNotEmpty($actual,$item) {
+         return $this->assert(!empty($actual),$item.'was empty');
      }
 
-     protected function assertNotNull($actual,$item,$successMessage=null) {
-         $this->assert($actual !== null,$item.'was null',$successMessage);
+     protected function assertNotNull($actual,$item) {
+         return $this->assert($actual !== null,$item.' was null');
      }
 
-     protected function assertEquals($expected,$actual,$message = '',$successMessage=null) {
+     protected function assertEquals($expected,$actual,$message = '') {
          if (!empty($message)) {
              $message = ', message: '.$message;
          }
-         $this->assert($expected == $actual,"Not equal: expected: $expected, actual:$actual $message",$successMessage);
+         return $this->assert($expected == $actual,"Not equal: expected: $expected, actual:$actual $message");
      }
+
+
 
     public function run() {
          try {

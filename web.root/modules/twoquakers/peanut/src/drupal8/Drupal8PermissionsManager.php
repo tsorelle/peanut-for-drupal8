@@ -19,7 +19,8 @@ use Tops\sys\TUser;
 
 class Drupal8PermissionsManager implements IPermissionsManager
 {
-    public static $permisionNameFormat = TStrings::initialCapFormat;
+    public static $permisionNameFormat = TStrings::dashedFormat;
+    public static $permisiondDescriptionFormat = TStrings::initialCapFormat;
 
     /**
      * @param string $roleName
@@ -28,7 +29,14 @@ class Drupal8PermissionsManager implements IPermissionsManager
     public function addRole($roleName, $roleDescription = null)
     {
         // drupal 8 doesn't use verbose descriptions
+
         return Drupal8Roles::addRole($roleName);
+    }
+
+    public function roleExists($roleName) {
+        $roleName = TStrings::convertNameFormat($roleName,Drupal8Roles::$roleNameFormat);
+        $exists = \Drupal\user\Entity\Role::load($roleName);
+        return ($exists !== null);
     }
 
     /**
@@ -121,11 +129,12 @@ class Drupal8PermissionsManager implements IPermissionsManager
 
     public function addPermission($name, $description)
     {
-        $name = TStrings::convertNameFormat($name,self::$permisionNameFormat);
+        $description = TStrings::convertNameFormat($name,self::$permisionNameFormat);
+        $permissionName = TStrings::convertNameFormat($name,TStrings::dashedFormat);
         $username = TUser::getCurrent()->getUserName();
         $existing = $this->getRepository()->getPermission($name);
         if (empty($existing)) {
-            $this->getRepository()->addPermission($name, $description, $username);
+            $this->getRepository()->addPermission($permissionName, $description, $username);
         }
         return true;
     }
@@ -136,7 +145,7 @@ class Drupal8PermissionsManager implements IPermissionsManager
         $list = $this->getRepository()->getAll();
         foreach ($list as $permission) {
             $permissions[$permission->getPermissionName()] =
-                ['title' => '','description' => $permission->getDescription()];
+                ['title' => $permission->getDescription(),'description' => ''];
 
         }
         return $permissions;

@@ -50,6 +50,10 @@ class Drupal8Roles
      */
     public static function addRole($roleName)
     {
+        $exists = self::getDrupalRole($roleName);
+        if ($exists !== false) {
+            return false;
+        }
         $roleId = TStrings::convertNameFormat($roleName,self::$roleNameFormat);
         $roleDescription = TStrings::convertNameFormat($roleName,TStrings::initialCapFormat);
         /**
