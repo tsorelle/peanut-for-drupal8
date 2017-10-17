@@ -14,11 +14,21 @@ use Tops\sys\TStrings;
 
 class Drupal8Roles
 {
-    public static $roleNameFormat = TStrings::keyFormat;
-    public static $roleDescriptionFormat = TStrings::initialCapFormat;
+    const roleHandleFormat = TStrings::keyFormat;
+    const roleDescriptionFormat = TStrings::initialCapFormat;
+    const administratorRole = 'administrator';
+    const authenticatedRole = 'authenticated_user';
+    const guestRole = 'anonymous';
+
 
     public static function formatRoleName($roleName) {
-        return TStrings::convertNameFormat($roleName,self::$roleNameFormat);
+        return TStrings::convertNameFormat($roleName,self::roleHandleFormat);
+    }
+
+    public static function roleExists($roleName) {
+        $roleName = TStrings::convertNameFormat($roleName,self::roleHandleFormat);
+        $exists = \Drupal\user\Entity\Role::load($roleName);
+        return ($exists !== null);
     }
 
     /**
@@ -27,7 +37,7 @@ class Drupal8Roles
      */
     public static function getDrupalRole($roleName)
     {
-        $roleName = TStrings::convertNameFormat($roleName,self::$roleNameFormat);
+        $roleName = TStrings::convertNameFormat($roleName,self::roleHandleFormat);
         try {
             /**
              * @var $roleObject RoleInterface
@@ -54,8 +64,8 @@ class Drupal8Roles
         if ($exists !== false) {
             return false;
         }
-        $roleId = TStrings::convertNameFormat($roleName,self::$roleNameFormat);
-        $roleDescription = TStrings::convertNameFormat($roleName,TStrings::initialCapFormat);
+        $roleId = TStrings::convertNameFormat($roleName,TStrings::keyFormat);
+        $roleDescription = TStrings::convertNameFormat($roleName,self::roleDescriptionFormat);
         /**
          * @var $roleObject RoleInterface
          */
@@ -90,12 +100,10 @@ class Drupal8Roles
          */
         $roleObjects = user_roles();
 
-        // unset($roleObjects['administrator']);
-
         foreach ($roleObjects as $roleName => $roleObject) {
             $item = new \stdClass();
-            $item->Name = $roleName;
-            $item->Value = $roleObject->label();
+            $item->name = $roleName;
+            $item->description = $roleObject->label();
             $result[] = $item;
         }
         return $result;

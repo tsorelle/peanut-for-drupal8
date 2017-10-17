@@ -53,9 +53,14 @@ class TDrupal8User extends TAbstractUser
         }
 
         $this->userName = $account->getAccountName();//  getUsername();
+        if (empty($this->userName)) {
+            $this->userName = TUser::DefaultUserName;
+        }
         $this->id = $account->id();
 
     }
+
+
 
 
     /**
@@ -112,7 +117,6 @@ class TDrupal8User extends TAbstractUser
      */
     protected function loadProfile()
     {
-
         // $this->profile['email'] = $this->drupalUser->get('mail')->value;
         $this->userEntity =\Drupal\user\Entity\User::load($this->getId());
         $this->fieldDefinitions =  $this->userEntity->getFieldDefinitions();
@@ -147,18 +151,21 @@ class TDrupal8User extends TAbstractUser
         return $result;
     }
 
-
-
-
+    private $isAdminUser;
     /**
      * @return bool
      */
     public function isAdmin()
     {
-        if ($this->drupalUser) {
-            return ($this->isMemberOf('administrator'));
+        if (!isset($this->isAdminUser)) {
+            if ($this->drupalUser) {
+                $roles = $this->drupalUser->getRoles();
+                $this->isAdminUser = in_array(Drupal8Roles::administratorRole, $roles);
+            } else {
+                $this->isAdminUser = false;
+            }
         }
-        return false;
+        return $this->isAdminUser;
     }
 
     public function isCurrent()
@@ -187,12 +194,15 @@ class TDrupal8User extends TAbstractUser
      */
     public function isMemberOf($roleName)
     {
-        if ($this->drupalUser) {
-            $roleName = Drupal8Roles::formatRoleName($roleName);
-            $roles = $this->drupalUser->getRoles();
-            return in_array($roleName,$roles);
+        $result = parent::isMemberOf($roleName);
+        if (!$result) {
+            if ($this->drupalUser) {
+                $roleName = Drupal8Roles::formatRoleName($roleName);
+                $roles = $this->drupalUser->getRoles();
+                return in_array($roleName,$roles);
+            }
         }
-        return false;
+        return $result;
     }
 
     /**
@@ -207,35 +217,14 @@ class TDrupal8User extends TAbstractUser
     }
 
 
-    /**
-     * @return array|bool|mixed|string
-     * @deprecated Drupal 7
-     */
-    public function getContentTypes() {
-        // todo: review and test before use in Drupal8
-        $result = $this->getProfileValue('user-content-types');
-        if (!$result) {
-            $types = node_type_get_types();
-            $result = array();
-            foreach($types as $type) {
-                if (!$type->disabled) {
-                    $permission =  $type->type == 'book' ? 'create new books' : 'create '.$type->type." content";
-                    if ($this->isAuthorized($permission)) {
-                        $result[$type->type] = $type;
-                    }
-                }
-            }
-            $this->setProfileValue('user-content-type',$result);
-        }
-        return $result;
-    }
-
-    public function isAuthorized($value = '')
+   public function isAuthorized($permissionName = '')
     {
-        $value = TStrings::convertNameFormat($value,Drupal8PermissionsManager::$permisionNameFormat);
-        $authorized = parent::isAuthorized($value);
+        $authorized = parent::isAuthorized($permissionName);
         if (!$authorized) {
-            $authorized = $this->drupalUser->hasPermission($value);
+            $permissionHandle = TStrings::convertNameFormat($permissionName,Drupal8PermissionsManager::permisionHandleFormat);
+            if (!$authorized) {
+                $authorized = $this->drupalUser->hasPermission($permissionHandle);
+            }
         }
         return $authorized;
     }
@@ -263,6 +252,29 @@ class TDrupal8User extends TAbstractUser
             }
         }
         return false;
+    }
+
+    /**
+     * @return array|bool|mixed|string
+     * @deprecated Drupal 7
+     */
+    public function getContentTypes() {
+        // todo: review and test before use in Drupal8
+        $result = $this->getProfileValue('user-content-types');
+        if (!$result) {
+            $types = node_type_get_types();
+            $result = array();
+            foreach($types as $type) {
+                if (!$type->disabled) {
+                    $permission =  $type->type == 'book' ? 'create new books' : 'create '.$type->type." content";
+                    if ($this->isAuthorized($permission)) {
+                        $result[$type->type] = $type;
+                    }
+                }
+            }
+            $this->setProfileValue('user-content-type',$result);
+        }
+        return $result;
     }
 
 

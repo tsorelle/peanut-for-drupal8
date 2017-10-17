@@ -11,6 +11,7 @@ namespace PeanutTest\scripts;
 
 
 use Tops\drupal8\TDrupal8User;
+use Tops\sys\TPermissionsManager;
 use Tops\sys\TUser;
 
 class UserTest extends TestScript
@@ -18,11 +19,12 @@ class UserTest extends TestScript
 
     const adminUser = 'admin';
     const testUser = 'mrtester';
-    const testUser2 = 'mrpeanut';
+    const peanutAdminUser = 'mrpeanut';
     const anonymous = 'Guest';
 
     public function execute()
     {
+        print "Testing current user\n";
         /**
          * @var $user TDrupal8User
          */
@@ -33,6 +35,7 @@ class UserTest extends TestScript
         $actual = $user->isCurrent();
         print "Is current user? " . ($actual ? 'Yes' : 'No') . "\n";
         $this->assert($actual, 'not current');
+
         $currentUserName = $user->getUserName();
         $authenticated = $user->isAuthenticated();
         print "Authenticated? " . ($authenticated ? 'Yes' : 'No') . "\n";
@@ -50,25 +53,24 @@ class UserTest extends TestScript
         } else {
             $this->assert(self::adminUser != $currentUserName, 'isAdmin failed');
         }
-        print "Current user short name: " . $user->getShortName() . "\n";
+
+        print "\nLoading test user\n";
 
         $user = TUser::getByUserName(self::testUser);
         $actual = $user->getUserName();
         $this->assertEquals(self::testUser, $actual, 'user name');
-        print "Loaded user " . self::testUser . "\n";
+        print "Loaded user ".self::testUser."\n";
 
         $testUserCurrent = $user->isCurrent();
-        print "Is '" . self::testUser . "' current user? " . ($testUserCurrent ? 'Yes' : 'No') . "\n";
+        print "Is '".self::testUser."' current user? " . ($testUserCurrent ? 'Yes' : 'No') . "\n";
 
-        $actual = $user->getEmail();
-        $this->assertNotNull($actual, 'Email');
-        print "Email: $actual\n";
+        $email = $user->getEmail();
+        $this->assertNotEmpty($email, 'email');
 
 
         $actual = $user->getFullName();
         $this->assertNotNull($actual, 'full name');
         print "Full name: $actual\n";
-
 
         $actual = $user->getShortName();
         $this->assertNotNull($actual, 'short name');
@@ -78,57 +80,19 @@ class UserTest extends TestScript
         $this->assertNotNull($actual, 'display name');
         print "Display name: $actual\n";
 
+        $actual = $user->getEmail();
+        $this->assertNotNull($actual, 'Email');
+        print "Email: $actual\n";
+
         $actusl = $user->isMemberOf('mail_administrator');
         print "Mail admin? " . ($actual ? 'Yes' : 'No') . "\n";
         $this->assert($actual, 'Not member of mail admin');
 
-        $actual = $user->isAuthorized(TUser::mailAdminPermissionName);
+        $actual = $user->isAuthorized(TPermissionsManager::mailAdminPermissionName);
         $this->assert($actual, 'cannot administer mail');
         print "Can administer mail? " . ($actual ? 'Yes' : 'No') . "\n";
 
-        $actual = $user->isAuthorized(TUser::appAdminPermissionName);
+        $actual = $user->isAuthorized(TPermissionsManager::appAdminPermissionName);
         $this->assert(!$actual, 'Not expected to administer peanut');
-        print "Can administer peanut? " . ($actual ? 'Yes' : 'No') . "\n";
-
-        // user 2
-        $user = TUser::getByUserName(self::testUser2);
-        $actual = $user->getUserName();
-        $this->assertEquals(self::testUser2, $actual, 'user name');
-        print "Loaded user " . self::testUser2 . "\n";
-
-        $testUserCurrent = $user->isCurrent();
-        print "Is '" . self::testUser2 . "' current user? " . ($testUserCurrent ? 'Yes' : 'No') . "\n";
-
-        $actual = $user->getEmail();
-        $this->assertNotNull($actual, 'Email');
-        print "Email: $actual\n";
-
-
-        $actual = $user->getFullName();
-        $this->assertNotNull($actual, 'full name');
-        print "Full name: $actual\n";
-
-
-        $actual = $user->getShortName();
-        $this->assertNotNull($actual, 'short name');
-        print "Short name: $actual\n";
-
-        $actual = $user->getDisplayName();
-        $this->assertNotNull($actual, 'display name');
-        print "Display name: $actual\n";
-
-        $actusl = $user->isMemberOf('mail_administrator');
-        print "Mail admin? " . ($actual ? 'Yes' : 'No') . "\n";
-        $this->assert($actual, 'Not member of mail admin');
-
-        $actual = $user->isAuthorized(TUser::mailAdminPermissionName);
-        $this->assert($actual, 'cannot administer mail');
-        print "Can administer mail? " . ($actual ? 'Yes' : 'No') . "\n";
-
-        $actual = $user->isAuthorized(TUser::appAdminPermissionName);
-        $this->assert($actual, 'Not expected to administer peanut');
-        print "Can administer peanut? " . ($actual ? 'Yes' : 'No') . "\n";
-
-
-    }
+        print "Can administer peanut? " . ($actual ? 'Yes' : 'No') . "\n";    }
 }

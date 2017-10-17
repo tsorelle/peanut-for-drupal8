@@ -10,11 +10,8 @@ namespace PeanutTest\scripts;
 
 
 use Tops\drupal8\Drupal8PermissionsManager;
-use Tops\drupal8\TDrupal8User;
+use Tops\sys\TPermissionsManager;
 use Tops\sys\TStrings;
-use Tops\sys\TUser;
-use Tops\wordpress\TWordpressUser;
-use Tops\wordpress\WordpressPermissionsManager;
 
 class UsersetupTest extends TestScript
 {
@@ -66,10 +63,8 @@ class UsersetupTest extends TestScript
     }
 
     private function removeRole($roleName,$roleCount) {
-        $removed = $this->manager->removeRole($roleName);
-        $expected = $removed ? $roleCount - 1 : $roleCount;
+        $this->manager->removeRole($roleName);
         $actual = $this->getRoleCount();
-        $this->assertEquals($expected,$actual,'Remove failed.');
         print ( $actual < $roleCount ? "Role '$roleName' removed.\n" : "Role '$roleName' not removed.\n" );
         return $actual;
     }
@@ -81,18 +76,35 @@ class UsersetupTest extends TestScript
         $roleCount = $this->getRoleCount();
 
         $testRole = 'test role';
-
         $roleCount = $this->addRole($testRole,$roleCount,true);
         $roleCount = $this->removeRole($testRole,$roleCount);
-        $roleCount = $this->addRole(TUser::appAdminRoleName,$roleCount);
-        $roleCount = $this->addRole(TUser::mailAdminRoleName,$roleCount);
+        $roleCount = $this->addRole(TPermissionsManager::appAdminRoleName,$roleCount);
+        $roleCount = $this->addRole(TPermissionsManager::mailAdminRoleName,$roleCount);
+        $roleCount = $this->addRole(TPermissionsManager::directoryAdminRoleName,$roleCount);
 
-        $this->manager->assignPermission(TUser::mailAdminRoleName,TUser::mailAdminPermissionName);
-        $this->manager->assignPermission(TUser::appAdminRoleName,TUser::mailAdminPermissionName);
-        $this->manager->assignPermission(TUser::appAdminRoleName,TUser::appAdminPermissionName);
+        $this->manager->addPermission(TPermissionsManager::mailAdminPermissionName);
+        $this->manager->addPermission(TPermissionsManager::appAdminPermissionName);
+        $this->manager->addPermission(TPermissionsManager::directoryAdminPermissionName);
+        $this->manager->addPermission(TPermissionsManager::viewDirectoryPermissionName);
+        $this->manager->addPermission(TPermissionsManager::updateDirectoryPermissionName);
 
+        $this->manager->assignPermission(TPermissionsManager::appAdminRoleName,TPermissionsManager::mailAdminPermissionName);
+        $this->manager->assignPermission(TPermissionsManager::appAdminRoleName,TPermissionsManager::appAdminPermissionName);
+        $this->manager->assignPermission(TPermissionsManager::appAdminRoleName,TPermissionsManager::directoryAdminPermissionName);
+        $this->manager->assignPermission(TPermissionsManager::appAdminRoleName,TPermissionsManager::viewDirectoryPermissionName);
+        $this->manager->assignPermission(TPermissionsManager::appAdminRoleName,TPermissionsManager::updateDirectoryPermissionName);
 
-        // print "\n".($this->continueTest ? 'Ready for "user" test. Add your test user to the mail admin role' : 'Setup failed')."\n";
+        $this->manager->assignPermission(TPermissionsManager::directoryAdminRoleName,TPermissionsManager::directoryAdminPermissionName);
+        $this->manager->assignPermission(TPermissionsManager::directoryAdminRoleName,TPermissionsManager::updateDirectoryPermissionName);
+        $this->manager->assignPermission(TPermissionsManager::directoryAdminRoleName,TPermissionsManager::viewDirectoryPermissionName);
+
+        $this->manager->assignPermission(TPermissionsManager::mailAdminRoleName,TPermissionsManager::mailAdminPermissionName);
+        $this->manager->assignPermission(TPermissionsManager::mailAdminRoleName,TPermissionsManager::updateDirectoryPermissionName);
+        $this->manager->assignPermission(TPermissionsManager::directoryAdminRoleName,TPermissionsManager::viewDirectoryPermissionName);
+
+        $this->manager->assignPermission(TPermissionsManager::authenticatedRole,TPermissionsManager::viewDirectoryPermissionName);
+
+        print "\n".($this->continueTest ? 'Ready for "user" test. Add your test user to the mail admin role' : 'Setup failed')."\n";
 
     }
 }

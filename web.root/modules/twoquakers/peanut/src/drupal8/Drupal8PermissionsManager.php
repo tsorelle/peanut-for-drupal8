@@ -9,18 +9,39 @@
 namespace Tops\drupal8;
 
 
-use Drupal\user\RoleInterface;
 use Tops\db\model\repository\BasicPermissionsRepository;
-use Tops\sys\IPermissionsManager;
-use Tops\drupal8\TDrupal8Permission;
 use Tops\sys\TPermission;
+use Tops\sys\TPermissionsManager;
 use Tops\sys\TStrings;
 use Tops\sys\TUser;
 
-class Drupal8PermissionsManager implements IPermissionsManager
+class Drupal8PermissionsManager extends TPermissionsManager
 {
-    public static $permisionNameFormat = TStrings::dashedFormat;
-    public static $permisiondDescriptionFormat = TStrings::initialCapFormat;
+    const permisionHandleFormat = TStrings::wordFormat; // used by Drupal
+    const permisionKeyFormat = TStrings::dashedFormat; // used in database
+    const permisionDescriptionFormat = TStrings::initialCapFormat;
+    const roleHandleFormat = TStrings::keyFormat;
+    const roleDescriptionFormat = TStrings::initialCapFormat;
+
+    public function getPermissionHandleFormat()
+    {
+        return self::permisionHandleFormat;
+    }
+
+    public function getRoleHandleFormat()
+    {
+        return Drupal8Roles::roleHandleFormat;
+    }
+
+    public function getGuestRole()
+    {
+        return Drupal8Roles::guestRole;
+    }
+
+    public function getAuthenticatedRole()
+    {
+        return Drupal8Roles::authenticatedRole;
+    }
 
     /**
      * @param string $roleName
@@ -31,12 +52,6 @@ class Drupal8PermissionsManager implements IPermissionsManager
         // drupal 8 doesn't use verbose descriptions
 
         return Drupal8Roles::addRole($roleName);
-    }
-
-    public function roleExists($roleName) {
-        $roleName = TStrings::convertNameFormat($roleName,Drupal8Roles::$roleNameFormat);
-        $exists = \Drupal\user\Entity\Role::load($roleName);
-        return ($exists !== null);
     }
 
     /**
@@ -61,7 +76,7 @@ class Drupal8PermissionsManager implements IPermissionsManager
      */
     public function getPermission($permissionName)
     {
-        $permissionName = TStrings::convertNameFormat($permissionName,self::$permisionNameFormat);
+        $permissionName = TStrings::convertNameFormat($permissionName,self::permisionKeyFormat);
         return $permission = $this->getRepository()->getEntity($permissionName);
     }
 
@@ -72,7 +87,7 @@ class Drupal8PermissionsManager implements IPermissionsManager
      */
     public function assignPermission($roleName, $permissionName)
     {
-        $permissionName = TStrings::convertNameFormat($permissionName,self::$permisionNameFormat);
+        $permissionName = TStrings::convertNameFormat($permissionName,self::permisionHandleFormat);
         $roleObject = Drupal8Roles::getDrupalRole($roleName);
         if ($roleObject === false) {
             return false;
@@ -89,7 +104,7 @@ class Drupal8PermissionsManager implements IPermissionsManager
      */
     public function revokePermission($roleName, $permissionName)
     {
-        $permissionName = TStrings::convertNameFormat($permissionName,self::$permisionNameFormat);
+        $permissionName = TStrings::convertNameFormat($permissionName,self::permisionHandleFormat);
         $roleObject = Drupal8Roles::getDrupalRole($roleName);
         if ($roleObject === false) {
             return false;
@@ -127,10 +142,10 @@ class Drupal8PermissionsManager implements IPermissionsManager
     }
 
 
-    public function addPermission($name, $description)
+    public function addPermission($name, $description=null)
     {
-        $description = TStrings::convertNameFormat($name,self::$permisionNameFormat);
-        $permissionName = TStrings::convertNameFormat($name,TStrings::dashedFormat);
+        $description = TStrings::convertNameFormat($name,self::permisionDescriptionFormat);
+        $permissionName = TStrings::convertNameFormat($name,self::permisionKeyFormat);
         $username = TUser::getCurrent()->getUserName();
         $existing = $this->getRepository()->getPermission($name);
         if (empty($existing)) {
@@ -144,22 +159,17 @@ class Drupal8PermissionsManager implements IPermissionsManager
         /** @var $list TDrupal8Permission[] */
         $list = $this->getRepository()->getAll();
         foreach ($list as $permission) {
-            $permissions[$permission->getPermissionName()] =
+            $name = TStrings::ConvertNameFormat($permission->getPermissionName(),self::permisionHandleFormat);
+            $permissions[$name] =
                 ['title' => $permission->getDescription(),'description' => ''];
-
         }
         return $permissions;
     }
 
     public function removePermission($name)
     {
-        $name = TStrings::convertNameFormat($name,self::$permisionNameFormat);
-
+        $name = TStrings::convertNameFormat($name,self::permisionKeyFormat);
         return $this->getRepository()->removePermission($name);
     }
 
-    public function verifyPermission($permissionName)
-    {
-        // TODO: Implement verifyPermission() method.
-    }
 }
