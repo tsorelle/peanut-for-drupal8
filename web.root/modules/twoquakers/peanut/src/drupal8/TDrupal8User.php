@@ -57,6 +57,7 @@ class TDrupal8User extends TAbstractUser
             $this->userName = TUser::DefaultUserName;
         }
         $this->id = $account->id();
+        $this->updateLanguage();
 
     }
 
