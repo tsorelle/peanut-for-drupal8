@@ -96,7 +96,9 @@ class TDrupal8User extends TAbstractUser
     public function loadByUserName($userName)
     {
         $account = user_load_by_name($userName);
-        $this->loadDrupalUser($account);
+        if ($account !== false) {
+            $this->loadDrupalUser($account);
+        }
     }
 
     /**
@@ -120,9 +122,14 @@ class TDrupal8User extends TAbstractUser
     {
         // $this->profile['email'] = $this->drupalUser->get('mail')->value;
         $this->userEntity =\Drupal\user\Entity\User::load($this->getId());
-        $this->fieldDefinitions =  $this->userEntity->getFieldDefinitions();
-        $email = $this->getEntityValue('mail',false);
-        $this->profile[TUser::profileKeyEmail] = $email;
+        if ($this->isAuthenticated()) {
+            $this->fieldDefinitions =  $this->userEntity->getFieldDefinitions();
+            $email = $this->getEntityValue('mail',false);
+            $this->profile[TUser::profileKeyEmail] = $email;
+        }
+        else {
+            $this->profile = [];
+        }
     }
 
     public function getProfileValue($key)
@@ -136,16 +143,18 @@ class TDrupal8User extends TAbstractUser
 
     private function getEntityValue($key,$custom=true) {
         $result = '';
-        $key = TUser::getProfileFieldKey($key); // TStrings::convertNameFormat($key,TStrings::keyFormat);
-        if ($custom) {
-            $key = "field_$key";
-        }
-        if (array_key_exists($key,$this->fieldDefinitions)) {
-            $field = $this->userEntity->get($key);
-            if (is_object($field)) {
-                $value = $field->getValue();
-                if (is_array($value) && !empty($value[0]['value'])) {
-                    $result = $value[0]['value'];
+        if ($this->isAuthenticated()) {
+            $key = TUser::getProfileFieldKey($key); // TStrings::convertNameFormat($key,TStrings::keyFormat);
+            if ($custom) {
+                $key = "field_$key";
+            }
+            if (array_key_exists($key, $this->fieldDefinitions)) {
+                $field = $this->userEntity->get($key);
+                if (is_object($field)) {
+                    $value = $field->getValue();
+                    if (is_array($value) && !empty($value[0]['value'])) {
+                        $result = $value[0]['value'];
+                    }
                 }
             }
         }
@@ -278,5 +287,19 @@ class TDrupal8User extends TAbstractUser
         return $result;
     }
 
+    public function signOut() {
+        user_logout();
+        $this->loadCurrentUser();
+    }
 
+
+    public function signIn($username, $password = null)
+    {
+        $account = user_load_by_name($username);
+        if ($account === false) {
+            return false;
+        }
+        user_login_finalize($account);
+        return true;
+    }
 }
